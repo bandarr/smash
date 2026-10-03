@@ -242,7 +242,7 @@ class OutputInterface {
    * Fields are a pair of threevectors for example electric and magnetic field
    */
   virtual void fields_output(
-      const std::string, const std::string,
+      const std::string &, const std::string &,
       const RectangularLattice<std::pair<ThreeVector, ThreeVector>> &) {}
 
   /// Get, whether this is the dilepton output?

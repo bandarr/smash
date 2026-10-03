@@ -113,7 +113,7 @@ class VtkOutput : public OutputInterface {
 
   /// \copydoc OutputInterface::fields_output
   void fields_output(
-      const std::string name1, const std::string name2,
+      const std::string &name1, const std::string &name2,
       const RectangularLattice<std::pair<ThreeVector, ThreeVector>> &lat)
       override;
 

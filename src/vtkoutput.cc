@@ -331,7 +331,7 @@ void VtkOutput::thermodynamics_output(
 }
 
 void VtkOutput::fields_output(
-    const std::string name1, const std::string name2,
+    const std::string &name1, const std::string &name2,
     const RectangularLattice<std::pair<ThreeVector, ThreeVector>> &lat) {
   if (!is_fields_output_) {
     return;
