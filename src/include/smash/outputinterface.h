@@ -195,9 +195,9 @@ class OutputInterface {
    * Output to write thermodynamics from the lattice.
    * Used for vtk output.
    */
-  virtual void thermodynamics_output(const ThermodynamicQuantity,
-                                     const DensityType,
-                                     RectangularLattice<DensityOnLattice> &) {}
+  virtual void thermodynamics_output(
+      const ThermodynamicQuantity, const DensityType,
+      const RectangularLattice<DensityOnLattice> &) {}
 
   /**
    * Output to write energy-momentum tensor and related quantities from the
@@ -205,21 +205,21 @@ class OutputInterface {
    */
   virtual void thermodynamics_output(
       const ThermodynamicQuantity, const DensityType,
-      RectangularLattice<EnergyMomentumTensor> &) {}
+      const RectangularLattice<EnergyMomentumTensor> &) {}
 
   /**
    * Output to write thermodynamics from the lattice.
    * Used for thermodynamic lattice output.
    */
   virtual void thermodynamics_lattice_output(
-      RectangularLattice<DensityOnLattice> &, const double) {}
+      const RectangularLattice<DensityOnLattice> &, const double) {}
 
   /**
    * Output to write thermodynamics from the lattice.
    * Used for thermodynamic lattice output.
    */
   virtual void thermodynamics_lattice_output(
-      RectangularLattice<DensityOnLattice> &, const double,
+      const RectangularLattice<DensityOnLattice> &, const double,
       const std::vector<Particles> &, const DensityParameters &) {}
 
   /**
@@ -227,8 +227,8 @@ class OutputInterface {
    * lattice. Used for thermodynamic lattice output.
    */
   virtual void thermodynamics_lattice_output(
-      const ThermodynamicQuantity, RectangularLattice<EnergyMomentumTensor> &,
-      const double) {}
+      const ThermodynamicQuantity,
+      const RectangularLattice<EnergyMomentumTensor> &, const double) {}
 
   /**
    * Output to write energy-momentum tensor and related quantities from the
@@ -243,7 +243,7 @@ class OutputInterface {
    */
   virtual void fields_output(
       const std::string, const std::string,
-      RectangularLattice<std::pair<ThreeVector, ThreeVector>> &) {}
+      const RectangularLattice<std::pair<ThreeVector, ThreeVector>> &) {}
 
   /// Get, whether this is the dilepton output?
   bool is_dilepton_output() const { return is_dilepton_output_; }

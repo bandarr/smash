@@ -104,7 +104,7 @@ class ThermodynamicLatticeOutput : public OutputInterface {
    * \param[in] current_time The output time in the computational frame
    */
   void thermodynamics_lattice_output(
-      RectangularLattice<DensityOnLattice> &lattice,
+      const RectangularLattice<DensityOnLattice> &lattice,
       double current_time) override;
 
   /**
@@ -119,8 +119,8 @@ class ThermodynamicLatticeOutput : public OutputInterface {
    *            smearing see \ref doxypage_output_thermodyn.
    */
   void thermodynamics_lattice_output(
-      RectangularLattice<DensityOnLattice> &lattice, const double current_time,
-      const std::vector<Particles> &ensembles,
+      const RectangularLattice<DensityOnLattice> &lattice,
+      const double current_time, const std::vector<Particles> &ensembles,
       const DensityParameters &dens_param) override;
 
   /**
@@ -134,7 +134,7 @@ class ThermodynamicLatticeOutput : public OutputInterface {
    */
   void thermodynamics_lattice_output(
       const ThermodynamicQuantity tq,
-      RectangularLattice<EnergyMomentumTensor> &lattice,
+      const RectangularLattice<EnergyMomentumTensor> &lattice,
       double current_time) override;
 
  private:
