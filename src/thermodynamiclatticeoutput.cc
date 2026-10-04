@@ -182,6 +182,47 @@ namespace smash {
 /* initialization of the static member version */
 const double_t ThermodynamicLatticeOutput::version = 1.0;
 
+/**
+ * Write a double to a binary output file.
+ *
+ * The value is taken by copy, which provides the addressable lvalue that
+ * \c std::ofstream::write needs, so that callers do not have to keep a
+ * scratch variable around for it.
+ *
+ * \param[in] fp Output file.
+ * \param[in] value Value to be written.
+ */
+static void write_binary(const std::shared_ptr<std::ofstream> &fp,
+                         const double value) {
+  fp->write(reinterpret_cast<const char *>(&value), sizeof(double));
+}
+
+/**
+ * Write the components of a three-vector to a binary output file.
+ *
+ * \param[in] fp Output file.
+ * \param[in] v Vector to be written.
+ */
+static void write_binary(const std::shared_ptr<std::ofstream> &fp,
+                         const ThreeVector &v) {
+  for (int l = 0; l < 3; l++) {
+    write_binary(fp, v[l]);
+  }
+}
+
+/**
+ * Write the components of a four-vector to a binary output file.
+ *
+ * \param[in] fp Output file.
+ * \param[in] v Vector to be written.
+ */
+static void write_binary(const std::shared_ptr<std::ofstream> &fp,
+                         const FourVector &v) {
+  for (int l = 0; l < 4; l++) {
+    write_binary(fp, v[l]);
+  }
+}
+
 ThermodynamicLatticeOutput::ThermodynamicLatticeOutput(
     const std::filesystem::path &path, const std::string &name,
     const OutputParameters &out_par, const bool enable_ascii,
@@ -510,7 +551,6 @@ void ThermodynamicLatticeOutput::at_eventend(const ThermodynamicQuantity tq) {
 
 void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
     const RectangularLattice<DensityOnLattice> &lattice, double ctime) {
-  double result;
   const auto dim = lattice.n_cells();
   std::shared_ptr<std::ofstream> fp(nullptr);
   if (enable_ascii_) {
@@ -521,8 +561,7 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
   }
   if (enable_binary_) {
     fp = output_binary_files_[ThermodynamicQuantity::EckartDensity];
-    assert(sizeof(ctime) == sizeof(double));
-    fp->write(reinterpret_cast<char *>(&ctime), sizeof(ctime));
+    write_binary(fp, ctime);
   }
   lattice.iterate_sublattice(
       {0, 0, 0}, dim, [&](const DensityOnLattice &node, int ix, int, int) {
@@ -533,8 +572,7 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
           }
         }
         if (enable_binary_) {
-          result = node.rho();
-          fp->write(reinterpret_cast<char *>(&result), sizeof(double));
+          write_binary(fp, node.rho());
         }
       });
 }
@@ -546,7 +584,6 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
   if (!enable_output_) {
     return;
   }
-  double result;
   const auto dim = lattice.n_cells();
   std::shared_ptr<std::ofstream> fp(nullptr);
   FourVector jQ = FourVector(), jB = FourVector(), jS = FourVector();
@@ -559,8 +596,7 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
   }
   if (enable_binary_) {
     fp = output_binary_files_[ThermodynamicQuantity::j_QBS];
-    assert(sizeof(ctime) == sizeof(double));
-    fp->write(reinterpret_cast<char *>(&ctime), sizeof(ctime));
+    write_binary(fp, ctime);
   }
   lattice.iterate_sublattice(
       {0, 0, 0}, dim, [&](const DensityOnLattice &, int ix, int iy, int iz) {
@@ -593,18 +629,9 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
           *fp << "\n";
         }
         if (enable_binary_) {
-          for (int l = 0; l < 4; l++) {
-            result = jQ[l];
-            fp->write(reinterpret_cast<char *>(&result), sizeof(double));
-          }
-          for (int l = 0; l < 4; l++) {
-            result = jB[l];
-            fp->write(reinterpret_cast<char *>(&result), sizeof(double));
-          }
-          for (int l = 0; l < 4; l++) {
-            result = jS[l];
-            fp->write(reinterpret_cast<char *>(&result), sizeof(double));
-          }
+          write_binary(fp, jQ);
+          write_binary(fp, jB);
+          write_binary(fp, jS);
         }
       });
 }
@@ -615,7 +642,6 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
   if (!enable_output_) {
     return;
   }
-  double result;
   const auto dim = lattice.n_cells();
   std::shared_ptr<std::ofstream> fp(nullptr);
   if (enable_ascii_) {
@@ -650,8 +676,7 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
       default:
         return;
     }
-    assert(sizeof(ctime) == sizeof(double));
-    fp->write(reinterpret_cast<char *>(&ctime), sizeof(double));
+    write_binary(fp, ctime);
   }
   switch (tq) {
     case ThermodynamicQuantity::Tmn:
@@ -667,8 +692,7 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
                   }
                 }
                 if (enable_binary_) {
-                  result = node[EnergyMomentumTensor::tmn_index(i, j)];
-                  fp->write(reinterpret_cast<char *>(&result), sizeof(double));
+                  write_binary(fp, node[EnergyMomentumTensor::tmn_index(i, j)]);
                 }
               });
         }
@@ -691,8 +715,8 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
                 if (enable_binary_) {
                   const FourVector u = node.landau_frame_4velocity();
                   const EnergyMomentumTensor Tmn_L = node.boosted(u);
-                  result = Tmn_L[EnergyMomentumTensor::tmn_index(i, j)];
-                  fp->write(reinterpret_cast<char *>(&result), sizeof(double));
+                  write_binary(fp,
+                               Tmn_L[EnergyMomentumTensor::tmn_index(i, j)]);
                 }
               });
         }
@@ -708,8 +732,7 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
             }
             if (enable_binary_) {
               const FourVector u = node.landau_frame_4velocity();
-              ThreeVector v = -u.velocity();
-              fp->write(reinterpret_cast<char *>(&v), 3 * sizeof(double));
+              write_binary(fp, -u.velocity());
             }
           });
       break;
